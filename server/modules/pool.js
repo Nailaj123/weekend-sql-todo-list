@@ -1,6 +1,8 @@
 const pg = require('pg');
+const url = require('url');
+
 const config = {
-    database: 'todo_list',
+    database: 'tasks',
     host: 'localhost',
     port: 5432,
     max: 10,

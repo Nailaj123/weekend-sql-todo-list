@@ -1,43 +1,52 @@
-$(document).ready(function () {
-    $('#newTaskBtn').on('click', addNew);
-    refresh();
-});
+console.log("js");
 
-function addNew() {
-    console.log('Btn clicked');
+$(document).ready(onReady);
+
+function onReady() {
+    console.log("jQ");
+    $("#newTaskButton").on('click', submitNewTask);
+    refreshTaskList();
+}
+
+function submitNewTask() {
+    console.log("SUBMIT BUTTON CLICKED");
     let todo = {
         task: "",
         status: ""
     };
-    todo.task = $('#newTask').val();
-    console.log('Task:', todo);
-    $('#newTask').val("");
-};
+    todo.task = $('#newTaskIn').val();
+    console.log("Task Entered: ", todo)
+    addTask(todo);
+    $("#newTaskIn").val("");
+}
+
 function addTask(taskToAdd) {
     $.ajax({
         type: 'POST',
         url: '/tasks',
         data: taskToAdd
     }).then(function (response) {
-        console.log('response from server:', response);
-        refresh();
+        console.log('Response from server: ', response);
+        refreshTaskList();
     }).catch(function (error) {
-        console.log('Error in POST function:', error);
+        console.log('Error in POST function: ', error)
         alert('Unable to add task');
     });
-};
 
-function refresh() {
+}
+function refreshTaskList() {
+    console.log('in refreshTask');
     $.ajax({
         type: 'GET',
-        url: '/tasks'
+        url: '/task',
     }).then(function (response) {
-        console.log(response);
-        appendTasks(response);
+        appendTask(response);
     }).catch(function (error) {
-        console.log('Error in GET function: ', error);
-    });
+        console.log('error in get', error);
+    })
+
 }
+
 function appendTasks(listOfTasks) {
     console.log("In appendTasks: ", listOfTasks);
     $("#taskTable").empty();
@@ -64,7 +73,9 @@ function appendTasks(listOfTasks) {
         }
     }
     $(".completeButton").on('click', completeTask);
+    $(".deleteButton").on('click', deleteTask);
 }
+
 function completeTask() {
     let taskId = $(this).parent().parent().data("id");
     let completeStatus = $(this).text();
@@ -83,6 +94,23 @@ function completeTask() {
     })
 }
 
-
-
-
+function deleteTask() {
+    let taskId = $(this).parent().parent().data("id");
+    console.log("Delete Task with ID: ", taskId);
+    let r = confirm("Are you sure you want to delete this task?");
+    if (r == true) {
+        $.ajax({
+            type: 'DELETE',
+            url: `tasks/${taskId}`,
+        })
+            .then(function (response) {
+                console.log("RESPONSE", response);
+                refreshTaskList();
+            })
+            .catch(function (error) {
+                alert("Error in DELETE function: ", error);
+            })
+    } else {
+        return;
+    }
+}
